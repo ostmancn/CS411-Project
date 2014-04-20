@@ -1,37 +1,37 @@
 <?php
 
-  include "query_functions/group_queries.php";
-  include "query_functions/portfolio_queries.php";
+  require_once("query_objects/Portfolio.php");
 
   function show_group_list() {
         $username = $_COOKIE["wolf_of_siebel_username"];
-        $groups = get_group_list_for_user($username);
-        foreach ($groups as $row) {
-            $quick_view_code = "<a href=\"?page=MyGroups&show" . $row['GID'] . "\"> Portfolio Quick View </a>";
+        $user_object = User::get_user_object($username);
+        $groups = $user_object->get_groups();
+        foreach ($groups as $group) {
+            $quick_view_code = "<a href=\"?page=MyGroups&showmore" . $group->GID . "\"> Portfolio Quick View </a>";
 
-            if (isset($_GET["show" . $row['GID']])) {
+            if (isset($_GET["show" . $group->GID])) {
                $quick_view_code = "<a href=\"?page=MyGroups\"> Hide </a>";
             }
 
             echo "<tr>";
-            echo "  <td>" . $row['groupName'] . "</td>\n";
-            echo "  <td>" . $row['groupName'] . "</td>\n";
-            echo "  <td>" . $row['groupName'] . "</td>\n";
-            echo "  <td> " . $quick_view_code . " </td>\n";
-            echo "  <td></td>";
+            echo "  <td> <a href=\"?page=Group&GID=" . $group->GID . "\">" . $group->group_name . " </a> </td>\n";
+            echo "  <td>" . $group->group_name . "</td>\n";
+            echo "  <td>" . $group->group_name . "</td>\n";
+            echo "  <td> </td>\n";
+            echo "  <td> " . $quick_view_code .  " </td>";
             echo "</tr>";
 
-            if (isset($_GET["show" . $row['GID']])) {
-                echo "<tr>";
-                show_portfolio($row['GID']);
-                echo "</tr>";
+            if (isset($_GET["showmore" . $group->GID])) {
+                echo "<tr> <td>";
+                //show_portfolio($group);
+                echo "</td> </tr>";
             }
         }
     } 
 
-    function show_portfolio($GID) {
+    function show_portfolio($group_object) {
         $username = $_COOKIE["wolf_of_siebel_username"];
-        $portfolio = get_stocks_portfolio_for_group($username, $GID);
+        $portfolio = Portfolio::get_portfolio_object(null, $group_object->GID, $username);
 
         echo '<table class="table table-striped">
                <thead>
@@ -46,15 +46,17 @@
                 </tr>
               </thead>
               <tbody>';
-        foreach ($portfolio as $stock) {
+
+        $stocks_in_port = $portfolio->get_bought_stocks();
+        foreach ($stocks_in_port as $stock) {
           echo "<tr>";
-          echo "  <td>" . $stock['ticker'] . "</td>\n";
-          echo "  <td>" . $stock['fullName'] . "</td>\n";
-          echo "  <td>" . $stock['Industry'] . "</td>\n";
-          echo "  <td>" . $stock['Market'] . "</td>\n";
-          echo "  <td>" . $stock['boughtTime'] . "</td>\n";
-          echo "  <td>" . $stock['boughtPrice'] . "</td>\n";
-          echo "  <td>" . $stock['numShares'] . "</td>\n";
+          echo "  <td>" . $stock->ticker . "</td>\n";
+          echo "  <td>" . $stock->get_stock_object()->full_name . "</td>\n";
+          echo "  <td>" . $stock->get_stock_object()->sector . "</td>\n";
+          echo "  <td>" . $stock->get_stock_object()->exchange . "</td>\n";
+          echo "  <td>" . $stock->bought_time . "</td>\n";
+          echo "  <td>" . $stock->bought_price . "</td>\n";
+          echo "  <td>" . $stock->number_of_shares. "</td>\n";
           echo "</tr>";
         }
       

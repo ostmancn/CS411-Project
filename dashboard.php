@@ -79,16 +79,11 @@
         </div>
         
         <?php
-          if (strcmp($_GET['page'], "MyGroups") == 0) {
-             include "dashboard_loaders/MyGroupsDisplay.php";
-          } else if (strcmp($_GET['page'], "GroupFinder") == 0) {
-             include "dashboard_loaders/GroupFinderDisplay.php";
-          } else if (strcmp($_GET['page'], "Stocks") == 0) {
-             include "dashboard_loaders/StocksDisplay.php";
+          if(file_exists("dashboard_loaders/" . $_GET['page'] . "Display.php")) {
+            require("dashboard_loaders/" . $_GET['page'] . "Display.php");
           } else {
-             include "dashboard_loaders/DashboardDisplay.php";
+            require("dashboard_loaders/DashboardDisplay.php");
           }
-
           display();
         ?>
     </div>
@@ -96,7 +91,7 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/docs.min.js"></script>
   </body>

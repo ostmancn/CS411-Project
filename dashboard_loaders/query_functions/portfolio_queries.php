@@ -24,7 +24,7 @@
             echo "Failed to connect to MySQL: " , mysqli_connect_error();
 
         $stmt = mysqli_prepare($con, "INSERT INTO  Portfolio (GID, moneyLeft, pName, username) VALUES (?, ?, ?, ?)");
-        mysqli_stmt_bind_param($stmt, "iiss", $time, $group_object['GID'], $group_object['startMoney'], $portfolio_name, $username);
+        mysqli_stmt_bind_param($stmt, "iiss", $group_object['GID'], $group_object['startMoney'], $portfolio_name, $username);
         if (!mysqli_stmt_execute($stmt)) {
             echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
         } 

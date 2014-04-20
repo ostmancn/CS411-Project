@@ -1,56 +1,95 @@
 <?php
 
-	include "query_functions/group_queries.php";
+	require_once("query_objects/Group.php");
 
 	function show_all_groups() {
-		$groups = get_all_groups($username);
-    foreach ($groups as $row) {
+    $username = $_COOKIE["wolf_of_siebel_username"];
+		$groups = Group::get_all_groups($username);
+    foreach ($groups as $group) {
       echo "<tr>";
-      echo "  <td>" . $row['groupName'] . "</td>\n";
-      echo "  <td>" . $row['groupName'] . "</td>\n";
-      echo "  <td>" . $row['groupName'] . "</td>\n";
-      echo '  <td> <a data-toggle="modal" href="#JoinGroup" link-number="' . $row['GID'] . '"> Join </a> </td>';
+      echo "  <td>" . $group->group_name . "</td>\n";
+      echo "  <td>" . $group->group_name . "</td>\n";
+      echo "  <td>" . $group->group_name . "</td>\n";
+      echo '  <td> <a data-toggle="modal" href="#JoinGroup" onclick="modalType(' . $group->GID . ', \'' . $group->group_name . '\')"> Join </a> </td>';
       echo "</tr>";
     }
 	}
 
   function modaljs() {
     echo "<script type=\"text/javascript\">
-     $(function(){
-      $('a[link-number]').live('click', function() {
-        alert('Below');
-        var index = $(this).attr('link-number') * 1 - 1;
-        $('#coverTextH3').text(data[index].H3)
-        $('#coverTextP').text(data[index].P)
-      });
-    });
+       function modalType(index, name) { 
+          $(\"#modalnum\")[0].value = index;
+          $(\"#modaltitle\").html(\"Join Group: \" + name);
+       }
     </script>";
   }
 
-  function modaldisplay() {
-    echo '<div class="modal fade" id="JoinGroup" tabindex="-1" role="dialog" aria-labelledby="purchaseLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="SignUpForm" action="/form_submisions/create_user_form.php" method="post">
+  function create_modal_display() {
+    echo '<div class="modal fade" id="CreateGroup" tabindex="-1" role="dialog" aria-labelledby="purchaseLabel" aria-hidden="true">
+        <div class="modal-dialog">  
+            <form id="CreateGroupForm" action="/form_submisions/create_group_form.php" method="post">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h3>Enter Information</h3>
+                  <h3> Create New Group: </h3>
                 </div>
                 <div class="modal-body" style= "padding-top: 0px;" >
                   <div class="divDialogElements">
-                    <h4>Username</h4>
-                    <input class="xlarge" id="xlInput" name="username" value="" type="text">
-                    
-                    <h4>Pasword</h4>
-                    <input class="xlarge" id="xlInput" name="password" value="" type="text">
-                    
-                    <h4>Retype Pasword</h4>
-                    <input class="xlarge" id="xlInput" name="repassword" value="" type="text">
-                    
+                    <h4>Group Name</h4>
+                    <input class="xlarge" id="xlInput" name="groupname" value="" type="text">
+                    <h4>Initial Money</h4>
+                    <input class="xlarge" id="xlInput" name="startmoney" value="" type="text">
+
                     <hr style="height:1px;border:none;color:#333;background-color:#333;">
-                    <h4>Name</h4>
-                    <input class="xlarge" id="xlInput" name="name" value="" type="text">
-                    <h4>Email</h4>
-                    <input class="xlarge" id="xlInput" name="email" value="" type="text">
+                    <h4>Your Portfolio Name</h4>
+                    <input class="xlarge" id="xlInput" name="portfolio" value="" type="text">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <a href="#" class="btn btn-primary" data-dismiss="modal">Cancel</a>
+                  <input type="submit" id="submit" class="btn btn-primary" value="Submit"><br>
+                </div>
+              </div>
+          </form>
+        </div>
+      </div>';
+  }
+
+  function join_modal_display() {
+    echo '<style>
+      .divDemoBody  {
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 100px;
+        }
+      .divDemoBody p {
+        font-size: 18px;
+        line-height: 140%;
+        padding-top: 12px;
+        }
+      .divDialogElements input {
+        font-size: 18px;
+        padding: 3px; 
+        height: 32px; 
+        width: 500px; 
+        }
+      .divButton {
+        padding-top: 12px;
+        }
+      </style>';
+
+    echo '<div class="modal fade" id="JoinGroup" tabindex="-1" role="dialog" aria-labelledby="purchaseLabel" aria-hidden="true">
+        <div class="modal-dialog">  
+            <form id="JoinGroupForm" action="/form_submisions/join_group_form.php" method="post">
+              <input type="hidden" id="modalnum" name="groupnum" value="0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3 id="modaltitle"> </h3>
+                </div>
+                <div class="modal-body" style= "padding-top: 0px;" >
+                  <div class="divDialogElements">
+                    <h4>Portfolio Name</h4>
+                    <input class="xlarge" id="xlInput" name="portfolio" value="" type="text">
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -65,11 +104,13 @@
 
 
 	function display() {
+    join_modal_display();
+    create_modal_display();
     modaljs();
-    modaldisplay();
 
 		echo '<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h2 class="sub-header">Group Finder</h2>
+              <a data-toggle="modal" class="btn btn-primary" href="#CreateGroup"> Create Group </a>
               <div class="table-responsive">
                 <table class="table table-striped">
                   <thead>

@@ -16,14 +16,20 @@
         return $line_of_text;
     }
 
-	function get_all_stocks($partname, $industry, $market, $sector, $price_min, $price_max) {
+	function get_all_stocks($partticker, $partname, $industry, $market, $sector, $price_min, $price_max) {
 		$con = mysqli_connect("engr-cpanel-mysql.engr.illinois.edu", "wolfofsiebel_usr", "qwertyuiop1", "wolfofsiebel_db");
         if (mysqli_connect_errno($con))
             echo "Failed to connect to MySQL: " , mysqli_connect_error();
         
-        $stmt = mysqli_prepare($con, 'SELECT * FROM Stock WHERE ticker LIKE ? OR fullName LIKE ?');
+        if (strcmp($partname, "") == 0)
+            $partname = "-----";
+        else if (strcmp($partticker, "") == 0)
+            $partticker = "-----";
+
+        $stmt = mysqli_prepare($con, 'SELECT * FROM Stock WHERE ticker LIKE ? OR fullName LIKE ? ORDER BY ticker ASC');
         $partname = $partname . "%";
-        mysqli_stmt_bind_param($stmt, "ss", $partname, $partname);
+        $partticker = $partticker . "%";
+        mysqli_stmt_bind_param($stmt, "ss", $partticker, $partname);
         $stmt->execute();
         $result = $stmt->get_result();
         $retval = array();
