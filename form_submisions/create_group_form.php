@@ -4,12 +4,15 @@
 	$groupname = $_POST['groupname'];
 	$start_money = intval($_POST['startmoney']);
 	$password = $_POST['password'];
+	$password = "NONE";
 
 	$portfolio = $_POST['portfolio'];
  	$username = $_COOKIE["wolf_of_siebel_username"];
 
  	$user_object = User::get_user_object($username);
+
  	$new_group = new Group($groupname, $start_money, $username, $password);
+ 	echo "|" . $new_group->group_name . "|";
 	if ($user_object->join_group($new_group->GID, $portfolio, $password)) {
     }
 ?>

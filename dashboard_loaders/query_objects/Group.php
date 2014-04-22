@@ -82,12 +82,13 @@ class Group {
         $stmt = mysqli_prepare($con, "INSERT INTO Groups (startMoney, groupName, owner) VALUES (?, ?, ?)");
         mysqli_stmt_bind_param($stmt, "iss", $start_money, $group_name, $owner_username);
         if (!mysqli_stmt_execute($stmt)) {
-            echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            echo "BAD GROUP Execute failed: (" . $stmt->errno . ") " . $stmt->error;
         	return null;
         }
 
         $this->GID = mysqli_insert_id($con);
-        Group::$loaded_groups[$this->GID] = $this;
+
+        Group::$loaded_groups[$this->GID] = $this;\
 	}
 
 	public function get_owner_user_object() {

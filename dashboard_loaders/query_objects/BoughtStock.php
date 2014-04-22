@@ -71,6 +71,48 @@ class BoughtStock {
         BoughtStock::$loaded_bought_stocks[$key_string] = $this;
 	}
 
+	public function revalidate($con) {
+		$result = mysqli_query($con, 'SELECT * FROM BoughtStock WHERE PID="' . $PID . '" AND ticker="' . $ticker . '" ORDER BY boughtTime ASC LIMIT 1');
+        if (!$row = mysqli_fetch_array($result)) 
+            return null;
+        
+        $this->bought_time = $row['boughtTime'];
+        $this->bought_price = $row['boughtPrice'];
+        $this->number_of_shares = $row['numShares'];
+	}
+
+	public function sell_stock($number_of_shares) {
+		$this->get_portfolio_object();
+		$con = mysqli_connect("engr-cpanel-mysql.engr.illinois.edu", "wolfofsiebel_usr", "qwertyuiop1", "wolfofsiebel_db");
+        if (mysqli_connect_errno($con))
+            echo "Failed to connect to MySQL: " , mysqli_connect_error();
+
+		mysqli_query($con, "START TRANSACTION");
+
+		$r1 = (is_null($this->revalidate($con)) || $number_of_shares > $this->number_of_shares);
+		
+		$new_num = $this->number_of_shares - $number_of_shares;
+		$r2 = false;
+		if ($new_num == 0)
+			$r2 = mysqli_query($con, "DELETE FROM BoughtStock WHERE ticker=\"" . $this->ticker . "\" AND PID=\"" . $this->PID . "\"");
+		else 
+			$r2 = mysqli_query($con, "UPDATE BoughtStock SET numShares=\"" . $new_num . "\" WHERE ticker=\"" . $this->ticker . "\" AND PID=\"" . $this->PID . "\"");
+
+    	$new_money = get_portfolio_object()->money_left + $number_of_shares * $this->bought_price;
+    	$r3 = mysqli_query($con, "UPDATE Portfolio SET moneyLeft=\"" . $new_money . "\" WHERE PID=\"" . $this->PID . "\"");
+    	if ($r1 and $r2 and $r3) {
+    		if ($new_money == 0)
+    			$this->get_portfolio_object()->remove_bought_stock($this->ticker);
+
+    		$this->get_portfolio_object()->money_left = $new_money;
+    		$this->number_of_shares = $new_num;
+    		mysqli_query($con, "COMMIT");
+    	} else {
+    		mysqli_query($con, "ROLLBACK");
+    	}
+
+	}
+
 	public function get_portfolio_object() {
 		if (is_null($this->portfolio_object)) {
 			$this->owner_user_object = Portfolio::get_portfolio_object($this->PID, null, null);

@@ -91,6 +91,13 @@ class Portfolio {
 		return $this->group_object;
 	}
 
+	public function remove_bought_stock($ticker) {
+		if (is_null($this->bought_stocks_objects)) 
+			return;
+
+		unset($this->bought_stocks_objects[$ticker]);
+	} 
+
 	public function get_bought_stocks() {
 		if (is_null($this->bought_stocks_objects)) {
 			$con = mysqli_connect("engr-cpanel-mysql.engr.illinois.edu", "wolfofsiebel_usr", "qwertyuiop1", "wolfofsiebel_db");
